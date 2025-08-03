@@ -9,3 +9,7 @@ requests
 pypdf
 python-dotenv
 sentence-transformers
+spacy
+pillow
+transformers
+torch

@@ -2,11 +2,21 @@ import requests
 from src.config import OWM_API_KEY
 
 def fetch_weather(city):
-    url = f"https://api.openweathermap.org/data/2.5/weather?q={city}&appid={OWM_API_KEY}&units=metric"
+    # Debug: Print what city we're looking for
+    print(f"🌍 Fetching weather for city: '{city}' (length: {len(city)})")
+    
+    # Clean and format city name
+    city_clean = city.strip().title()
+    print(f"🌍 Cleaned city name: '{city_clean}'")
+    
+    url = f"https://api.openweathermap.org/data/2.5/weather?q={city_clean}&appid={OWM_API_KEY}&units=metric"
+    print(f"🌍 API URL: {url[:80]}...")
     
     try:
         response = requests.get(url)
         data = response.json()
+        print(f"🌍 API Response status: {response.status_code}")
+        print(f"🌍 API Response data keys: {list(data.keys()) if isinstance(data, dict) else 'Not a dict'}")
 
         if response.status_code != 200 or data.get('cod') != 200:
             return f"Sorry, couldn't fetch weather for {city}. API error: {data.get('message', response.status_code)}"

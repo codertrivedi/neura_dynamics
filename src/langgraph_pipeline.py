@@ -3,6 +3,7 @@ from typing import TypedDict
 from src.nodes.weather_node import fetch_weather
 from src.nodes.rag_node import query_rag
 from src.nodes.decision_node import decide_query_type
+from src.utils.city_parser import extract_city_name
 from langgraph.graph import START, END
 
 class GraphState(TypedDict):
@@ -22,13 +23,11 @@ def build_graph(vectorstore):
     def weather_node(state: GraphState) -> GraphState:
         try:
             print("Weather node called")
-            query_lower = state["query"].lower()
-            if " in " in query_lower:
-                city = state["query"].split(" in ")[-1].strip().rstrip("?")
-            else:
-                # Fallback to last word
-                city = state["query"].split()[-1].rstrip("?")
+            print(f"🔍 Original query: '{state['query']}'")
             
+            # Use spaCy-based city extraction
+            city = extract_city_name(state["query"])
+            print(f"🔍 Final city to fetch: '{city}'")
             response = fetch_weather(city)
             return {**state, "response": response}
         except Exception as e:
