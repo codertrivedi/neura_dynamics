@@ -69,7 +69,7 @@ def summarize_content(content, content_type="text"):
         llm = ChatGroq(
             model="llama3-8b-8192",
             api_key=GROQ_API_KEY,
-            temperature=0.3
+            temperature=0.5
         )
         
         prompt = f"""

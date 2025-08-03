@@ -48,7 +48,7 @@ def build_graph(vectorstore):
 
     # Set entry point
     graph.add_edge(START, "decide")
-    
+
     # Add conditional edges - the function should take state and return the branch value
     def route_query(state: GraphState) -> str:
         return state["branch"]
