@@ -1,1 +1,11 @@
-# Project requirements
+langchain
+langgraph
+langsmith
+qdrant-client
+openai
+llama-index
+streamlit
+requests
+pypdf
+python-dotenv
+sentence-transformers
