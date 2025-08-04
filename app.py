@@ -20,7 +20,7 @@ except Exception as e:
 
 # Enable LangSmith tracing
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "neura-dynamics-ai"-
+os.environ["LANGCHAIN_PROJECT"] = "neura-dynamics-ai"
 
 # Check if LangSmith is configured
 if 'LANGSMITH_API_KEY' in os.environ:
