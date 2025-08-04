@@ -13,3 +13,6 @@ spacy
 pillow
 transformers
 torch
+langchain-groq
+langchain-huggingface
+langchain-community

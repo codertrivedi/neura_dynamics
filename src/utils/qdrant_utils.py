@@ -12,7 +12,7 @@ def get_vector_store():
         embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
         _vector_store = Qdrant(
             embeddings=embeddings,
-            path=":memory:",
+            location=":memory:",
             collection_name="neura_dynamics_data"
         )
     return _vector_store
@@ -27,7 +27,7 @@ def initialize_with_documents(texts):
     _vector_store = Qdrant.from_documents(
         documents=docs,
         embedding=embeddings,
-        path=":memory:",
+        location=":memory:",
         collection_name="neura_dynamics_data"
     )
     

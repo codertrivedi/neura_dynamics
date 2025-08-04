@@ -20,19 +20,19 @@ except Exception as e:
 
 # Enable LangSmith tracing
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
-os.environ["LANGCHAIN_PROJECT"] = "neura-dynamics-ai"
+os.environ["LANGCHAIN_PROJECT"] = "neura-dynamics-ai"-
 
 # Check if LangSmith is configured
 if 'LANGSMITH_API_KEY' in os.environ:
-    print("✅ LangSmith tracing enabled")
+    print(" -- LangSmith tracing enabled")
 else:
-    print("⚠️ LangSmith API key not found")
+    print(" -- LangSmith API key not found")
 
 # Debug: Check if API key is available
 if 'OWM_API_KEY' in os.environ:
-    print(f"✅ Weather API key loaded (length: {len(os.environ['OWM_API_KEY'])})")
+    print(f" -- Weather API key loaded (length: {len(os.environ['OWM_API_KEY'])})")
 else:
-    print("❌ Weather API key NOT found in environment")
+    print(" -- Weather API key NOT found in environment")
 
 from src.utils.pdf_parser import load_pdf_text
 from src.utils.qdrant_utils import initialize_with_documents as generate_embeddings

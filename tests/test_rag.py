@@ -12,7 +12,7 @@ def test_query_rag_no_results():
     result = query_rag(vectordb, "What is missing?")
     assert result == "No relevant information found."
 
-@patch('langchain_groq.ChatGroq')
+@patch('src.nodes.rag_node.ChatGroq')
 def test_query_rag_with_results(mock_chat_groq):
     mock_llm = MagicMock()
     mock_response = MagicMock()

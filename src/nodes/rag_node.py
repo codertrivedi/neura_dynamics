@@ -4,8 +4,12 @@ from src.config import GROQ_API_KEY
 
 
 def query_rag(vectorstore, query):
-    from src.utils.qdrant_utils import search_similar
-    results = search_similar(query)
+    try:
+        retriever = vectorstore.as_retriever(search_kwargs={"k": 5})
+        results = retriever.invoke(query)
+    except Exception as e:
+        print(f"Failed to search vector store: {e}")
+        results = []
     
     if not results:
         return "No relevant information found."
