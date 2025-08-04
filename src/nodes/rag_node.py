@@ -1,7 +1,34 @@
+from langchain_groq import ChatGroq
+from langchain.schema import HumanMessage, SystemMessage
+from src.config import GROQ_API_KEY
+
+
 def query_rag(vectorstore, query):
     retriever = vectorstore.as_retriever()
     results = retriever.invoke(query)
-    return results[0].page_content if results else "No relevant info found."
+    
+    if not results:
+        return "No relevant information found."
+    
+    # Get the most relevant result
+    relevant_content = results[0].page_content
+    print(f"🔍 Retrieved content: {relevant_content[:200]}...")
+    
+    # Use LLM to process the retrieved content and answer the query
+    llm = ChatGroq(
+        model="llama3-8b-8192",
+        api_key=GROQ_API_KEY,
+        temperature=0.4,
+        max_tokens=150
+    )
+    
+    messages = [
+        SystemMessage(content="You are a helpful assistant. Answer the user's question based on the provided context. Be concise and direct."),
+        HumanMessage(content=f"Context: {relevant_content}\n\nQuestion: {query}\n\nAnswer:")
+    ]
+    
+    response = llm.invoke(messages)
+    return response.content
 
 
 if __name__ == "__main__":

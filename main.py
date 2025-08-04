@@ -18,9 +18,9 @@ def simulate_pipeline(query: str):
     result = graph.invoke({"query": query})
     raw_response = result["response"]
     
-    # Step 4: Process response with LLM (determine if weather or RAG response)
+    # Step 4: Process response based on query type
     if "weather" in query.lower():
-        # Weather response - process with LLM if it's raw data
+        # Weather response - format if it's raw data
         if isinstance(raw_response, dict):
             city = query.split()[-1].rstrip("?")
             processed_response = process_weather_data(raw_response, city)

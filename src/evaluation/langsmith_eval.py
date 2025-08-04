@@ -2,9 +2,12 @@ from dotenv import load_dotenv
 from langsmith import Client
 import os
 from src.config import LANGSMITH_API_KEY
+from langsmith.run_helpers import get_current_run_tree
+from langsmith import traceable
 
 load_dotenv()
 
+@traceable(run_type="chain", name="evaluate_response")
 def evaluate_output(query, response):
     """
     Simple evaluation that logs to LangSmith for tracking
@@ -17,55 +20,49 @@ def evaluate_output(query, response):
         
         # Calculate local score for immediate feedback
         score = _calculate_response_score(query, response)
+        # Classify query type based on weather-related keywords
+        weather_keywords = ['weather', 'temperature', 'temp', 'humidity', 'wind', 'rain', 'sunny', 'cloudy', 'forecast']
+        query_type = 'weather' if any(keyword in query.lower() for keyword in weather_keywords) else 'document'
         
-        # Log evaluation locally (LangSmith will auto-trace if LANGCHAIN_TRACING_V2=true)
+        # Log evaluation locally
         print(f"📊 Response Quality Score: {score:.2f}/1.0")
-        print(f"📊 Query Type: {'weather' if 'weather' in query.lower() else 'document'}")
+        print(f"📊 Query Type: {query_type}")
         
-        # The automatic tracing (enabled in app.py) will handle LangSmith logging
+        # Send evaluation data to LangSmith
+        client = Client()
+        
+        # Try to get the current run to attach feedback
+        try:
+            current_run = get_current_run_tree()
+            if current_run:
+                # Create feedback for the current run
+                client.create_feedback(
+                    run_id=current_run.id,
+                    key="response_quality_score",
+                    score=score,
+                    comment=f"Query Type: {query_type}, Response Length: {len(response)} chars"
+                )
+                
+                # Create additional feedback for query type
+                client.create_feedback(
+                    run_id=current_run.id,
+                    key="query_type",
+                    value=query_type,
+                    comment=f"Automatically classified query type based on content"
+                )
+                
+                print(f"✅ Evaluation data sent to LangSmith (Run ID: {current_run.id})")
+            else:
+                print("⚠️ No current run found, evaluation data not sent to LangSmith")
+        except Exception as feedback_error:
+            print(f"⚠️ Failed to send feedback to LangSmith: {feedback_error}")
+        
         return score
         
     except Exception as e:
         print(f"Evaluation failed: {str(e)}")
         return None
 
-def create_evaluation_dataset():
-    """
-    Create a LangSmith dataset for proper evaluation (run this once)
-    """
-    try:
-        client = Client()
-        
-        # Create dataset for weather and document queries
-        dataset = client.create_dataset(
-            dataset_name="neura-dynamics-test-cases",
-            description="Test cases for Neura Dynamics AI - weather and document queries"
-        )
-        
-        # Sample test cases
-        examples = [
-            {
-                "inputs": {"query": "What is the weather in Delhi?"},
-                "outputs": {"expected_type": "weather", "should_contain": ["temperature", "delhi"]}
-            },
-            {
-                "inputs": {"query": "What are the key points in the document?"},
-                "outputs": {"expected_type": "document", "should_contain": ["key points", "document"]}
-            },
-            {
-                "inputs": {"query": "How's the weather in Mumbai today?"},
-                "outputs": {"expected_type": "weather", "should_contain": ["temperature", "mumbai"]}
-            }
-        ]
-        
-        # Add examples to dataset
-        client.create_examples(dataset_id=dataset.id, examples=examples)
-        print(f"✅ Created evaluation dataset: {dataset.id}")
-        return dataset.id
-        
-    except Exception as e:
-        print(f"Failed to create dataset: {e}")
-        return None
 
 def _calculate_response_score(query, response):
     """Calculate automatic response quality score (0.0 to 1.0)"""

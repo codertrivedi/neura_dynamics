@@ -12,11 +12,11 @@ sys.path.append(str(current_dir))
 try:
     from dotenv import load_dotenv
     load_dotenv()
-    print("✅ Loaded .env file")
+    print("Loaded .env file")
 except ImportError:
-    print("⚠️ python-dotenv not installed, using system environment variables")
+    print("python-dotenv not installed, using system environment variables")
 except Exception as e:
-    print(f"⚠️ Could not load .env file: {e}")
+    print(f"Could not load .env file: {e}")
 
 # Enable LangSmith tracing
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
@@ -70,7 +70,7 @@ def process_query(query: str):
         print(f"🔍 Raw response: {raw_response}")
         print(f"🔍 Response type: {type(raw_response)}")
         
-        # Process response with LLM (same logic as main.py)
+        # Process response based on query type
         if "weather" in query.lower():
             if isinstance(raw_response, dict):
                 city = query.split()[-1].rstrip("?")
@@ -82,6 +82,17 @@ def process_query(query: str):
         else:
             processed_response = process_rag_response(raw_response, query)
             print(f"📄 Processed RAG response")
+        
+        # Evaluate within the traced context
+        try:
+            evaluation_score = evaluate_output(query, processed_response)
+            if evaluation_score:
+                print(f"📊 LangSmith evaluation completed (Score: {evaluation_score:.2f})")
+                # Store evaluation score for Streamlit display
+                st.session_state.last_evaluation_score = evaluation_score
+        except Exception as eval_error:
+            print(f"⚠️ LangSmith evaluation failed: {eval_error}")
+            st.session_state.last_evaluation_score = None
         
         return processed_response
         
@@ -113,15 +124,9 @@ def main():
             response = process_query(query)
             st.markdown(f"**Answer:** {response}")
             
-            # Evaluate the response with LangSmith after showing it to user
-            try:
-                evaluation_score = evaluate_output(query, response)
-                if evaluation_score:
-                    st.info(f"📊 Response Quality Score: {evaluation_score:.2f}/1.0")
-                    print(f"📊 LangSmith evaluation completed (Score: {evaluation_score:.2f})")
-            except Exception as eval_error:
-                st.warning("⚠️ Evaluation failed")
-                print(f"⚠️ LangSmith evaluation failed: {eval_error}")
+            # Display evaluation score if available
+            if hasattr(st.session_state, 'last_evaluation_score') and st.session_state.last_evaluation_score:
+                st.info(f"📊 Response Quality Score: {st.session_state.last_evaluation_score:.2f}/1.0")
 
 if __name__ == "__main__":
     main()
