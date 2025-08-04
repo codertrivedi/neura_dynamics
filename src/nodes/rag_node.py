@@ -4,8 +4,8 @@ from src.config import GROQ_API_KEY
 
 
 def query_rag(vectorstore, query):
-    retriever = vectorstore.as_retriever()
-    results = retriever.invoke(query)
+    from src.utils.qdrant_utils import search_similar
+    results = search_similar(query)
     
     if not results:
         return "No relevant information found."
@@ -23,7 +23,7 @@ def query_rag(vectorstore, query):
     )
     
     messages = [
-        SystemMessage(content="You are a helpful assistant. Answer the user's question based on the provided context. Be concise and direct."),
+        SystemMessage(content="You are a helpful assistant. Answer the user's question in a natural conversational way based on the provided context."),
         HumanMessage(content=f"Context: {relevant_content}\n\nQuestion: {query}\n\nAnswer:")
     ]
     
@@ -33,6 +33,6 @@ def query_rag(vectorstore, query):
 
 if __name__ == "__main__":
     from src.utils.pdf_parser import load_pdf_text
-    from src.utils.embedding_utils import generate_embeddings
+    from src.utils.qdrant_utils import initialize_with_documents as generate_embeddings
     vectordb = generate_embeddings(load_pdf_text())
     print(query_rag(vectordb, "key concepts"))

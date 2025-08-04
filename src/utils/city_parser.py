@@ -120,7 +120,7 @@ if __name__ == "__main__":
         "How is the weather in Los Angeles today?"
     ]
     
-    print("🧪 Testing city extraction:")
+    print("Testing city extraction:")
     print("=" * 60)
     for query in test_queries:
         city = extract_city_name(query)

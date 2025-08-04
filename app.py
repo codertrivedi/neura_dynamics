@@ -35,9 +35,8 @@ else:
     print("❌ Weather API key NOT found in environment")
 
 from src.utils.pdf_parser import load_pdf_text
-from src.utils.embedding_utils import generate_embeddings
+from src.utils.qdrant_utils import initialize_with_documents as generate_embeddings
 from src.langgraph_pipeline import build_graph
-from src.utils.llm_2 import process_weather_data, process_rag_response
 from src.evaluation.langsmith_eval import evaluate_output
 
 im = Image.open(r"S:\project\neura_dynamics\neura_dynamics\neura.png")
@@ -70,18 +69,8 @@ def process_query(query: str):
         print(f"🔍 Raw response: {raw_response}")
         print(f"🔍 Response type: {type(raw_response)}")
         
-        # Process response based on query type
-        if "weather" in query.lower():
-            if isinstance(raw_response, dict):
-                city = query.split()[-1].rstrip("?")
-                processed_response = process_weather_data(raw_response, city)
-                print(f"🌤️ Processed weather data for {city}")
-            else:
-                processed_response = raw_response
-                print(f"⚠️ Weather response was not dict: {raw_response}")
-        else:
-            processed_response = process_rag_response(raw_response, query)
-            print(f"📄 Processed RAG response")
+        # Response already processed by RAG node with LLM
+        processed_response = raw_response
         
         # Evaluate within the traced context
         try:

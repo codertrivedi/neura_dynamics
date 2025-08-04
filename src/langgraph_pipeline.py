@@ -34,15 +34,8 @@ def build_graph(vectorstore):
             
             # If successful, store in vector DB
             if isinstance(weather_data, dict):
-                from datetime import datetime
-                import json
-                
-                # Process weather data into text for embedding
-                weather_text = f"Weather data for {city} on {datetime.now().strftime('%Y-%m-%d %H:%M')}: Temperature {weather_data.get('main', {}).get('temp')}°C, feels like {weather_data.get('main', {}).get('feels_like')}°C, humidity {weather_data.get('main', {}).get('humidity')}%, weather conditions: {weather_data.get('weather', [{}])[0].get('description', 'unknown')}, wind speed {weather_data.get('wind', {}).get('speed')} m/s"
-                
-                # Store in vector database
-                vectorstore.add_texts([weather_text], metadatas=[{"type": "weather", "city": city, "timestamp": datetime.now().isoformat()}])
-                print(f"✅ Weather data stored in vector DB for {city}")
+                from src.utils.qdrant_utils import store_weather_data
+                store_weather_data(weather_data, city)
             
             # Now use RAG to answer the query
             response = query_rag(vectorstore, state["query"])
